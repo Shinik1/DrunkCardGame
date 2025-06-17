@@ -1,118 +1,159 @@
-class Queue: # создание класса очередь
+# Определяем класс Queue (очередь) для хранения карт игроков
+class Queue:
+    # Инициализация пустой очереди
     def __init__(self):
-        self.items = []
+        self.items = []  # Используем список для хранения элементов очереди
     
+    # Метод добавления элемента в конец очереди
     def enqueue(self, item):
         self.items.append(item)
     
+    # Метод извлечения элемента из начала очереди
     def dequeue(self):
-        if not self.is_empty():
-            return self.items.pop(0)
-        return None
+        if not self.is_empty():  # Проверяем, не пуста ли очередь
+            return self.items.pop(0)  # Удаляем и возвращаем первый элемент
+        return None  # Возвращаем None, если очередь пуста
     
+    # Метод проверки очереди на пустоту
     def is_empty(self):
-        return len(self.items) == 0
+        return len(self.items) == 0  # True, если очередь пуста
     
+    # Метод получения размера очереди
     def size(self):
-        return len(self.items)
+        return len(self.items)  # Возвращаем количество элементов
 
 
-# проверка входных данных на корректность
+# Определяем класс Player для представления игрока
+class Player:
+    # Инициализация игрока с именем
+    def __init__(self, name):
+        self.name = name  # Имя игрока (first или second)
+        self.deck = Queue()  # Колода карт игрока (экземпляр Queue)
+    
+    # Метод добавления списка карт в колоду игрока
+    def add_cards(self, cards):
+        for card in cards:  # Добавляем каждую карту по очереди
+            self.deck.enqueue(card)
+    
+    # Метод проверки, пуста ли колода игрока
+    def is_empty(self):
+        return self.deck.is_empty()  # Используем метод Queue
+    
+    # Метод розыгрыша верхней карты
+    def play_card(self):
+        return self.deck.dequeue()  # Извлекаем карту из колоды
+    
+    # Метод взятия карт после выигранного раунда
+    def take_cards(self, card1, card2):
+        self.deck.enqueue(card1)  # Сначала кладем карту первого игрока
+        self.deck.enqueue(card2)  # Затем карту второго игрока
+
+
+# Функция проверки корректности введенных данных
 def validate_input(cards_str, player_name):
     try:
+        # Пробуем преобразовать строку в список чисел
         cards = list(map(int, cards_str.split()))
     except ValueError:
+        # Если преобразование не удалось - ошибка ввода
         raise ValueError(f"У игрока {player_name} введены нечисловые данные")
     
+    # Проверяем, что карт ровно 5
     if len(cards) != 5:
         raise ValueError(f"У игрока {player_name} должно быть ровно 5 карт")
     
+    # Проверяем, что все карты в диапазоне 0-9
     if any(card < 0 or card > 9 for card in cards):
         raise ValueError(f"У игрока {player_name} карты должны быть числами от 0 до 9")
     
+    # Проверяем на уникальность карт
     if len(set(cards)) != len(cards):
         raise ValueError(f"У игрока {player_name} есть повторяющиеся карты")
     
-    return cards
+    return cards  # Возвращаем валидный список карт
 
-# получение списка карт игрока 
+
+# Функция получения корректных карт от пользователя
 def get_valid_cards(player_name, existing_cards=None):
-    while True:
+    while True:  # Бесконечный цикл, пока не получим правильные данные
         try:
+            # Запрашиваем ввод карт
             cards_str = input(f"Введите карты для игрока {player_name} (5 уникальных чисел 0-9 через пробел): ")
+            # Проверяем введенные данные
             cards = validate_input(cards_str, player_name)
             
+            # Если переданы существующие карты, проверяем на пересечение
             if existing_cards:
                 common = set(cards) & set(existing_cards)
                 if common:
                     raise ValueError(f"Карты {common} уже есть у другого игрока")
             
-            return cards
+            return cards  # Возвращаем корректные карты
         except ValueError as e:
-            print(f"Ошибка: {e}")
+            print(f"Ошибка: {e}")  # Выводим сообщение об ошибке
 
-# основная логика игры
-def drunken_simulator():    
+
+# Основная функция симуляции игры
+def drunken_simulator():
     # Получаем карты первого игрока
     first_cards = get_valid_cards("first")
     
-    # Получаем карты второго игрока с проверкой на пересечение
+    # Получаем карты второго игрока с дополнительной проверкой
     while True:
         second_cards = get_valid_cards("second", first_cards)
         
-        # Дополнительная проверка, что первый игрок не имеет карт второго
+        # Проверяем, что карты не пересекаются
         common = set(first_cards) & set(second_cards)
         if not common:
-            break
-            
+            break  # Выходим из цикла, если пересечений нет
+        
+        # Иначе сообщаем об ошибке
         print(f"Ошибка: карты {common} присутствуют у обоих игроков")
         print("Пожалуйста, измените карты для второго игрока")
     
-    # Инициализация колод
-    first = Queue()
-    second = Queue()
+    # Создаем игроков
+    first_player = Player("first")
+    second_player = Player("second")
     
-    for card in first_cards:
-        first.enqueue(card)
-    for card in second_cards:
-        second.enqueue(card)
+    # Добавляем карты игрокам
+    first_player.add_cards(first_cards)
+    second_player.add_cards(second_cards)
     
-    max_moves = 10**6
-    moves = 0
+    max_moves = 10**6  # Максимальное количество ходов
+    moves = 0  # Счетчик ходов
     
+    # Основной игровой цикл
     while moves <= max_moves:
-        if first.is_empty():
-            print(f"second  {moves}")
+        # Проверяем окончание игры
+        if first_player.is_empty():
+            print(f"second {moves}")
             return
-        if second.is_empty():
-            print(f"first за {moves}")
+        if second_player.is_empty():
+            print(f"first {moves}")
             return
         
-        card1 = first.dequeue()
-        card2 = second.dequeue()
+        # Игроки разыгрывают карты
+        card1 = first_player.play_card()
+        card2 = second_player.play_card()
         
         # Определяем победителя раунда
         if (card1 == 0 and card2 == 9):
-            winner = 1
+            winner = first_player  # Особый случай: 0 бьет 9
         elif (card1 == 9 and card2 == 0):
-            winner = 2
+            winner = second_player  # Особый случай: 0 бьет 9
         elif card1 > card2:
-            winner = 1
+            winner = first_player  # Старшая карта побеждает
         else:
-            winner = 2
+            winner = second_player  # Иначе побеждает второй игрок
         
-        # Кладем карты в колоду победителя
-        if winner == 1:
-            first.enqueue(card1)
-            first.enqueue(card2)
-        else:
-            second.enqueue(card1)
-            second.enqueue(card2)
+        # Победитель забирает карты
+        winner.take_cards(card1, card2)
         
-        moves += 1
+        moves += 1  # Увеличиваем счетчик ходов
     
-    print("Botva")
+    # Если превышено максимальное число ходов
+    print("botva")
 
 
-
+# Запуск игры
 drunken_simulator()
