@@ -1,26 +1,62 @@
+# Класс узла для связанного списка, используемого в очереди
+class QueueNode:
+    def __init__(self, value):
+        self.value = value  # Значение узла
+        self.next = None    # Ссылка на следующий узел
+
+
 # Определяем класс Queue (очередь) для хранения карт игроков
 class Queue:
     # Инициализация пустой очереди
     def __init__(self):
-        self.items = []  # Используем список для хранения элементов очереди
+        self.head = None  # Указатель на начало очереди 
+        self.tail = None  # Указатель на конец очереди
+        self._size = 0    # Счетчик элементов в очереди
     
     # Метод добавления элемента в конец очереди
     def enqueue(self, item):
-        self.items.append(item)
+        # Создаем новый узел с заданным значением
+        new_node = QueueNode(item)
+        # Если очередь пуста, новый узел становится и головой и хвостом
+        if self.tail is None:
+            self.head = new_node
+            self.tail = new_node
+        else:
+            # Иначе добавляем новый узел после текущего хвоста
+            self.tail.next = new_node
+            self.tail = new_node
+        # Увеличиваем счетчик элементов
+        self._size += 1
     
     # Метод извлечения элемента из начала очереди
     def dequeue(self):
-        if not self.is_empty():  # Проверяем, не пуста ли очередь
-            return self.items.pop(0)  # Удаляем и возвращаем первый элемент
-        return None  # Возвращаем None, если очередь пуста
+        # Если очередь пуста, возвращаем None
+        if self.head is None:
+            return None
+        
+        # Сохраняем значение головного узла
+        value = self.head.value
+        # Перемещаем указатель головы на следующий узел
+        self.head = self.head.next
+        
+        # Если голова стала None, значит очередь опустела - обнуляем хвост
+        if self.head is None:
+            self.tail = None
+        
+        # Уменьшаем счетчик элементов
+        self._size -= 1
+        # Возвращаем значение извлеченного элемента
+        return value
     
     # Метод проверки очереди на пустоту
     def is_empty(self):
-        return len(self.items) == 0  # True, если очередь пуста
+        # Очередь пуста, если голова None
+        return self.head is None
     
     # Метод получения размера очереди
     def size(self):
-        return len(self.items)  # Возвращаем количество элементов
+        # Возвращаем количество элементов в очереди
+        return self._size
 
 
 # Определяем класс Player для представления игрока
@@ -78,7 +114,7 @@ def get_valid_cards(player_name, existing_cards=None):
     while True:  # Бесконечный цикл, пока не получим правильные данные
         try:
             # Запрашиваем ввод карт
-            cards_str = input(f"Введите карты для игрока {player_name} (5 уникальных чисел 0-9 через пробел): ")
+            cards_str = input(f"Введите 5 уникальных карт (0-9) для игрока {player_name}: ")
             # Проверяем введенные данные
             cards = validate_input(cards_str, player_name)
             
@@ -155,5 +191,4 @@ def drunken_simulator():
     print("botva")
 
 
-# Запуск игры
 drunken_simulator()
