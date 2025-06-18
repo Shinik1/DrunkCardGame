@@ -11,7 +11,7 @@ class Queue:
     def __init__(self):
         self.head = None  # Указатель на начало очереди 
         self.tail = None  # Указатель на конец очереди
-        self._size = 0    # Счетчик элементов в очереди
+       
     
     # Метод добавления элемента в конец очереди
     def enqueue(self, item):
@@ -25,8 +25,7 @@ class Queue:
             # Иначе добавляем новый узел после текущего хвоста
             self.tail.next = new_node
             self.tail = new_node
-        # Увеличиваем счетчик элементов
-        self._size += 1
+        
     
     # Метод извлечения элемента из начала очереди
     def dequeue(self):
@@ -43,8 +42,6 @@ class Queue:
         if self.head is None:
             self.tail = None
         
-        # Уменьшаем счетчик элементов
-        self._size -= 1
         # Возвращаем значение извлеченного элемента
         return value
     
@@ -52,11 +49,6 @@ class Queue:
     def is_empty(self):
         # Очередь пуста, если голова None
         return self.head is None
-    
-    # Метод получения размера очереди
-    def size(self):
-        # Возвращаем количество элементов в очереди
-        return self._size
 
 
 # Определяем класс Player для представления игрока
