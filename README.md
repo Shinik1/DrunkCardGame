@@ -7,7 +7,7 @@
   Классы:
     1.Queue (Очередь)
       1.1Реализация FIFO (First In, First Out) для хранения карт.
-      1.2Методы: enqueue(), dequeue(), is_empty(), size().
+      1.2Методы: enqueue(), dequeue(), is_empty().
     2.Player (Игрок)
       2.1Хранит имя и колоду карт (Queue).
       2.2Методы: add_cards(), play_card(), take_cards().
